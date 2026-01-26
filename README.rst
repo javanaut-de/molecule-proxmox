@@ -107,8 +107,11 @@ Examples
        # Optional: Specify the VM id of the clone.
        newid: 216
      - name: test02
-       # Optional: Specify the VM id of the clone.
        newid: 217
+       # Optional: Specify MAC for NIC of the clone.
+       net:
+         # Format according to Proxmox <VM ID>.conf
+         net0: 'virtio=72:74:c0:01:ca:fe'
 
 .. code-block:: yaml
 
@@ -197,6 +200,9 @@ Finally, a configuration example with many features enabled:
          ipconfig0: 'ip=192.168.0.2/24,gw=192.168.0.1'
        nameservers:
          - 192.169.0.245
+       # Specify MAC depending from Jenkins magic variable.
+       net:
+         net0: 'virtio=72:74:00:ca:fe:${WORKER_INDEX:-00}'
 
 Development
 ===========

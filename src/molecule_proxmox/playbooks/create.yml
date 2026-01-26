@@ -66,6 +66,14 @@
         loop_var: rc
         label: "{{ rc.p.name, rc.vmid }}"
 
+    - name: "Update NIC settings in molecule instance config(s)"
+      include_tasks: common/modify_nic.yml
+      when: rc.p.net is defined
+      loop: "{{ proxmox_clone.results }}"
+      loop_control:
+        loop_var: rc
+        label: "{{ rc.p.name, rc.vmid }}"
+
     - name: "Start molecule instance(s)."
       proxmox_qemu_agent:
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
