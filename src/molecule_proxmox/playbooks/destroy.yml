@@ -62,4 +62,23 @@
         loop_var: i
         label: "{{ i.instance, i.vmid }}"
 
-
+    - name: "Remove existing Proxomx VM(s) with requested VM ID(s) forcefully."
+      community.general.proxmox_kvm:
+        api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+        api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+        api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+        api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+        api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+        api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+        state: absent
+        vmid: "{{ p.newid | d(p.newid, true) | d(omit, true) }}"
+        node: "{{ options.node }}"
+        force: yes
+        timeout: "{{ options.timeout | d(omit) }}"
+      when:
+        - options.kill_existing | d(false)
+        - p.newid | d(0, true) != 0
+      loop: "{{ molecule_yml.platforms }}"
+      loop_control:
+        loop_var: p
+        label: "{{ p.name, p.newid }}"

@@ -188,6 +188,12 @@ Finally, a configuration example with many features enabled:
         ssh_port: 22022             # default to 22
         ssh_identity_file: /path/to/id_rsa
         template_name: debian11
+
+        # This will preemptively remove ANY existing VM(s) with VM ID matching the
+        # value for newid of any platforms defined before a test run
+        # e.g. in case the corresponding molecule instance was already cleared.
+        kill_existing: true
+
    platforms:
      - name: test01
        newid: 1000
