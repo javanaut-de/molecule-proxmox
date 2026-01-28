@@ -26,24 +26,6 @@
         mode: '0644'
       when: not instance_config_stat.stat.exists
 
-    - name: "Stop molecule instance(s) with force."
-      community.general.proxmox_kvm:
-        api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
-        api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
-        api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
-        api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
-        api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
-        api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
-        state: stopped
-        vmid: "{{ i.vmid }}"
-        node: "{{ options.node }}"
-        force: yes
-        timeout: "{{ options.timeout | d(omit) }}"
-      loop: "{{ lookup('file', molecule_instance_config) | from_yaml }}"
-      loop_control:
-        loop_var: i
-        label: "{{ i.instance, i.vmid }}"
-
     - name: "Remove molecule instance(s)."
       community.general.proxmox_kvm:
         api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
