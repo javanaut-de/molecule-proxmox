@@ -161,7 +161,7 @@
         api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
         api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
         api_timeout: "{{ options.api_timeout | d(omit) }}"
-        validate_certs: false
+        validate_certs: "{{ options.validate_certs | d(true) }}"
         vmid: "{{ rc.vmid }}"
         node: "{{ rc.p.proxmox_node | d(rc.p.node, true) | d(options.node, true) }}"
         timeout: "{{ options.timeout | d(omit) }}"
