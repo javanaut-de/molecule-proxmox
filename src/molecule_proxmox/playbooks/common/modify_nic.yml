@@ -1,0 +1,81 @@
+---
+
+
+- name: "Update NIC settings in molecule instance config(s)"
+  vars:
+
+    # List of allowed NIC models according to proxmox_kvm_module, see
+    # https://docs.ansible.com/projects/ansible/latest/collections/community/proxmox/proxmox_kvm_module.html#parameter-net
+    NIC_MODELS:
+      - e1000
+      - e1000-82540em
+      - e1000-82544gc
+      - e1000-82545em
+      - i82551
+      - i82557b
+      - i82559er
+      - ne2k_isa
+      - ne2k_pci
+      - pcnet
+      - rtl8139
+      - virtio
+      - vmxnet3
+
+    nic_config_tokens: >-
+      {{ nic_item.nic_config | split(',') }}
+    nic_model_token: >-
+      {{ nic_config_tokens
+      | select('search', '^(' + (NIC_MODELS | join('|')) + ')')
+      | first | d('') }}
+
+    nic_model: >-
+      {{ nic_model_token | split('=')
+      | first | d('') }}
+
+    # Padding MAC segments with zero to allow input
+    # from single digit index variables
+    # e.g. some worker ID
+    nic_mac: >-
+      {{ (nic_model_token | split('='))[1] | d('')
+      | split(':')
+      | map('regex_replace', '^([0-9a-fA-F])$', '0\1')
+      | join(':') }}
+
+    nic_bridge: >-
+      {{ nic_config_tokens
+      | select('search', '^bridge')
+      | first | split('=')
+      | last | d('vmbr0') }}
+    nic_firewall: >-
+      {{ nic_config_tokens | select('search', '^firewall')
+      | first | split('=') | last | d(1) }}
+
+  community.proxmox.proxmox_nic:
+
+    api_host: "{{ api_host | d(options.api_host) | d(omit) }}"
+    api_port: "{{ api_port | d(options.api_port) | d(omit) }}"
+    api_user: "{{ api_user | d(options.api_user) | d(omit) }}"
+    api_password: "{{ api_password | d(options.api_password) | d(omit) }}"
+    api_token_id: "{{ api_token_id | d(options.api_token_id) | d(omit) }}"
+    api_token_secret: "{{ api_token_secret | d(options.api_token_secret) | d(omit) }}"
+
+    validate_certs: "{{ options.validate_certs | d(true) }}"
+
+    vmid: "{{ rc.vmid }}"
+    interface: "{{ nic_item.interface }}"
+
+    model: "{{ nic_model | d(omit, true) }}"
+    mac: "{{ nic_mac | d(omit, true) }}"
+
+    bridge: "{{ nic_bridge | d(omit, true) }}"
+    firewall: "{{ nic_firewall | d(omit, true) }}"
+
+  loop: >-
+    {{ rc.p.net
+    | dict2items(key_name='interface',
+    value_name='nic_config') }}
+  loop_control:
+    loop_var: nic_item
+
+
+...

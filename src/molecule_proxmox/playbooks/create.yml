@@ -185,6 +185,15 @@
         loop_var: rc
         label: "{{ rc.p.name, rc.vmid }}"
 
+    - name: "Update NIC settings in molecule instance config(s)"
+      include_tasks: common/modify_nic.yml
+      when: rc.p.net is defined
+      loop: "{{ proxmox_clone.results }}"
+      loop_control:
+        loop_var: rc
+        label: "{{ rc.p.name, rc.vmid }}"
+
+
     # Take the snapshot before the first boot, so every create starts
     # from the same state.
     - name: "Snapshot instance(s)."
